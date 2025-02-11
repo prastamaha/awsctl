@@ -19,6 +19,9 @@ universal_binaries:
 brews:
   - name: awsctl
     homepage: https://github.com/prastamaha/awsctl
+    repository:
+      owner: prastamaha
+      name: homebrew-tap
     commit_author:
       name: prasamaha
       email: prastamaha@gmail.com
