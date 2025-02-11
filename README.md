@@ -1,6 +1,6 @@
 # AWSCTL
 
-kubectl like aws cli.
+kubectl-style command line tool for AWS.
 
 ## Installation
 
