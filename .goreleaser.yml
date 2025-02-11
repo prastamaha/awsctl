@@ -16,5 +16,12 @@ release:
 universal_binaries:
   - replace: true
 
+brews:
+  - name: awsctl
+    homepage: https://github.com/prastamaha/awsctl
+    commit_author:
+      name: prasamaha
+      email: prastamaha@gmail.com
+
 checksum:
   name_template: 'checksums.txt'
