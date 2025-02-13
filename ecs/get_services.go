@@ -3,6 +3,7 @@ package ecs
 import (
 	"context"
 	"fmt"
+	"github/prastamaha/awsctl/utils"
 	"log"
 	"os"
 	"strings"
@@ -12,6 +13,44 @@ import (
 )
 
 func (e *ECS) GetServicesCommand(cluster string) {
+	outputs := e.GetAllServices(cluster)
+	if len(outputs) == 0 {
+		fmt.Printf("No resources found in %s region\n", os.Getenv("AWS_REGION"))
+		return
+	}
+
+	prn, err := klo.PrinterFromFlag("", &klo.Specs{DefaultColumnSpec: "NAME:{.Name},REPLICAS:{.Replicas},TASK_DEFINITION:{.TaskDefinition},STATUS:{.Status},TYPE:{.Type},CREATED_AT:{.CreatedAt}"})
+	if err != nil {
+		panic(err)
+	}
+
+	table, err := klo.NewSortingPrinter("{.Name}", prn)
+	if err != nil {
+		panic(err)
+	}
+	table.Fprint(os.Stdout, outputs)
+}
+
+func (e *ECS) GetServicesCommandFzf() {
+	ecsClusters := e.GetAllECSCluster()
+	if len(ecsClusters) == 0 {
+		fmt.Println("No ecs clusters found")
+		return
+	}
+
+	items := make([]string, len(ecsClusters))
+	for i, v := range ecsClusters {
+		items[i] = v.Name
+	}
+
+	data := utils.FuzzySearch("Select an ecs cluster: ", items)
+	for _, i := range data {
+		name := ecsClusters[i].Name
+		e.GetServicesCommand(name)
+	}
+}
+
+func (e *ECS) GetAllServices(cluster string) []ECSServicesList {
 	client := ecs.NewFromConfig(e.AWSConfig)
 
 	respGetCluster, err := client.DescribeClusters(context.TODO(), &ecs.DescribeClustersInput{
@@ -65,20 +104,5 @@ func (e *ECS) GetServicesCommand(cluster string) {
 		nextToken = respServiceList.NextToken
 	}
 
-	if len(outputs) == 0 {
-		fmt.Printf("No resources found in %s region\n", os.Getenv("AWS_REGION"))
-		return
-	}
-
-	prn, err := klo.PrinterFromFlag("", &klo.Specs{DefaultColumnSpec: "NAME:{.Name},REPLICAS:{.Replicas},TASK_DEFINITION:{.TaskDefinition},STATUS:{.Status},TYPE:{.Type},CREATED_AT:{.CreatedAt}"})
-	if err != nil {
-		panic(err)
-	}
-
-	// Use a table sorter and tell it to sort by the Name field of our column objects.
-	table, err := klo.NewSortingPrinter("{.Name}", prn)
-	if err != nil {
-		panic(err)
-	}
-	table.Fprint(os.Stdout, outputs)
+	return outputs
 }

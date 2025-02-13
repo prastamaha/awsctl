@@ -3,6 +3,7 @@ package ecs
 import (
 	"context"
 	"fmt"
+	"github/prastamaha/awsctl/utils"
 	"log"
 
 	"github.com/aws/aws-sdk-go-v2/service/ecs"
@@ -104,4 +105,39 @@ func (e *ECS) DescribeServiceCommand(service string, cluster string) {
 		return
 	}
 	fmt.Println(string(yamlData))
+}
+
+func (e *ECS) DescribeServiceCommandFzf() {
+	ecsClusters := e.GetAllECSCluster()
+	if len(ecsClusters) == 0 {
+		fmt.Println("No ecs clusters found")
+		return
+	}
+
+	items := make([]string, len(ecsClusters))
+	for i, v := range ecsClusters {
+		items[i] = v.Name
+	}
+
+	data := utils.FuzzySearch("Select an ecs cluster: ", items)
+	for _, i := range data {
+		clusterName := ecsClusters[i].Name
+
+		ecsServices := e.GetAllServices(clusterName)
+		if len(ecsServices) == 0 {
+			fmt.Println("No ecs service found")
+			return
+		}
+
+		items := make([]string, len(ecsServices))
+		for i, v := range ecsServices {
+			items[i] = v.Name
+		}
+
+		data := utils.FuzzySearch("Select an ecs service to describe:: ", items)
+		for _, i := range data {
+			serviceName := ecsServices[i].Name
+			e.DescribeServiceCommand(serviceName, clusterName)
+		}
+	}
 }

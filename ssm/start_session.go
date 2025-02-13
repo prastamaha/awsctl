@@ -5,6 +5,8 @@ import (
 	"github/prastamaha/awsctl/instance"
 	"log"
 
+	ec2types "github.com/aws/aws-sdk-go-v2/service/ec2/types"
+	"github.com/aws/aws-sdk-go/aws"
 	"github.com/koki-develop/go-fzf"
 	"github.com/mmmorris1975/ssm-session-client/ssmclient"
 )
@@ -21,8 +23,12 @@ func (s *SSM) StartSessionFzf() {
 		AWSConfig: cfg,
 	}
 
-	// convert instanceList to []string of Name and ID
-	instanceList := ins.GetRunningInstance()
+	instanceList := ins.GetInstance(
+		ec2types.Filter{
+			Name:   aws.String("instance-state-name"),
+			Values: []string{"running"},
+		},
+	)
 	items := make([]string, len(instanceList))
 	for i, v := range instanceList {
 		items[i] = fmt.Sprintf("%s %s", v.ID, v.Name)

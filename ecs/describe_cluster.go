@@ -42,5 +42,23 @@ func (e *ECS) DescribeClusterCommand(name string) {
 		return
 	}
 	fmt.Println(string(yamlData))
+}
 
+func (e *ECS) DescribeClusterCommandFzf() {
+	ecsClusters := e.GetAllECSCluster()
+	if len(ecsClusters) == 0 {
+		fmt.Println("No ecs clusters found")
+		return
+	}
+	
+	items := make([]string, len(ecsClusters))
+	for i, v := range ecsClusters {
+		items[i] = v.Name
+	}
+
+	data := utils.FuzzySearch("Select an ecs cluster to describe: ", items)
+	for _, i := range data {
+		name := ecsClusters[i].Name
+		e.DescribeClusterCommand(name)
+	}
 }

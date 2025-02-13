@@ -16,23 +16,24 @@ import (
 var version = "v0.0.2"
 
 func main() {
+	// load aws config
 	cfg, err := config.LoadDefaultConfig(context.TODO(), config.WithRegion(os.Getenv("AWS_REGION")))
 	if err != nil {
 		log.Fatalf("unable to load SDK config, %v", err)
 	}
 
-	ins := instance.Instance{
-		AWSConfig: cfg,
-	}
+	// initialize services
+	ins := instance.Instance{AWSConfig: cfg}
+	ec2Ssm := ssm.SSM{AWSConfig: cfg}
+	ecs := ecs.ECS{AWSConfig: cfg}
 
-	ec2Ssm := ssm.SSM{
-		AWSConfig: cfg,
-	}
+	// aliases
+	instanceAliases := []string{"in", "ins", "instances", "ec2"}
+	ssmAliases := []string{"start-session", "ssh"}
+	ecsClusterAliases := []string{"ecsc", "ecscluster", "ecsclusters"}
+	ecsServiceAliases := []string{"ecss", "ecsservice", "ecsservices", "ecssvc"}
 
-	ecs := ecs.ECS{
-		AWSConfig: cfg,
-	}
-
+	// cli commands
 	app := &cli.Command{
 		Name:  "awsctl",
 		Usage: "Simplify aws cli",
@@ -43,7 +44,7 @@ func main() {
 				Commands: []*cli.Command{
 					{
 						Name:    "instance",
-						Aliases: []string{"in", "ins", "instances", "ec2"},
+						Aliases: instanceAliases,
 						Usage:   "Get EC2 Instances",
 						Action: func(ctx context.Context, cmd *cli.Command) error {
 							ins.GetCommand()
@@ -52,7 +53,7 @@ func main() {
 					},
 					{
 						Name:    "ecs-cluster",
-						Aliases: []string{"ecsc", "ecscluster", "ecsclusters"},
+						Aliases: ecsClusterAliases,
 						Usage:   "Get ECS Clusters",
 						Action: func(ctx context.Context, cmd *cli.Command) error {
 							ecs.GetClusterCommand()
@@ -61,17 +62,21 @@ func main() {
 					},
 					{
 						Name:    "ecs-service",
-						Aliases: []string{"ecss", "ecsservice", "ecsservices"},
+						Aliases: ecsServiceAliases,
 						Usage:   "Get ECS Services",
 						Flags: []cli.Flag{
 							&cli.StringFlag{
 								Name:     "cluster",
-								Required: true,
+								Required: false,
 								Usage:    "Cluster name",
 							},
 						},
 						Action: func(ctx context.Context, cmd *cli.Command) error {
-							ecs.GetServicesCommand(cmd.String("cluster"))
+							if cmd.String("cluster") == "" {
+								ecs.GetServicesCommandFzf()
+							} else {
+								ecs.GetServicesCommand(cmd.String("cluster"))
+							}
 							return nil
 						},
 					},
@@ -83,7 +88,7 @@ func main() {
 				Commands: []*cli.Command{
 					{
 						Name:      "instance",
-						Aliases:   []string{"in", "ins", "instances", "ec2"},
+						Aliases:   instanceAliases,
 						Usage:     "Describe EC2 Instances",
 						ArgsUsage: "[instance id]",
 						Action: func(ctx context.Context, cmd *cli.Command) error {
@@ -97,28 +102,36 @@ func main() {
 					},
 					{
 						Name:      "ecs-cluster",
-						Aliases:   []string{"ecsc", "ecscluster", "ecsclusters"},
+						Aliases:   ecsClusterAliases,
 						Usage:     "Describe ECS Clusters",
 						ArgsUsage: "[cluster name]",
 						Action: func(ctx context.Context, cmd *cli.Command) error {
-							ecs.DescribeClusterCommand(cmd.Args().Get(0))
+							if cmd.Args().Get(0) == "" {
+								ecs.DescribeClusterCommandFzf()
+							} else {
+								ecs.DescribeClusterCommand(cmd.Args().Get(0))
+							}
 							return nil
 						},
 					},
 					{
 						Name:    "ecs-service",
-						Aliases: []string{"ecss", "ecsservice", "ecsservices"},
+						Aliases: ecsServiceAliases,
 						Usage:   "Describe ECS Services",
 						Flags: []cli.Flag{
 							&cli.StringFlag{
 								Name:     "cluster",
-								Required: true,
+								Required: false,
 								Usage:    "Cluster name",
 							},
 						},
 						ArgsUsage: "[service name]",
 						Action: func(ctx context.Context, cmd *cli.Command) error {
-							ecs.DescribeServiceCommand(cmd.Args().Get(0), cmd.String("cluster"))
+							if cmd.Args().Get(0) == "" && cmd.String("cluster") == "" {
+								ecs.DescribeServiceCommandFzf()
+							} else {
+								ecs.DescribeServiceCommand(cmd.Args().Get(0), cmd.String("cluster"))
+							}
 							return nil
 						},
 					},
@@ -130,7 +143,7 @@ func main() {
 				Commands: []*cli.Command{
 					{
 						Name:      "instance",
-						Aliases:   []string{"in", "ins", "instances", "ec2"},
+						Aliases:   instanceAliases,
 						Usage:     "Stop EC2 Instance",
 						ArgsUsage: "[instance id]",
 						Action: func(ctx context.Context, cmd *cli.Command) error {
@@ -150,7 +163,7 @@ func main() {
 				Commands: []*cli.Command{
 					{
 						Name:      "instance",
-						Aliases:   []string{"in", "ins", "instances", "ec2"},
+						Aliases:   instanceAliases,
 						Usage:     "Restart EC2 Instance",
 						ArgsUsage: "[instance id]",
 						Action: func(ctx context.Context, cmd *cli.Command) error {
@@ -170,7 +183,7 @@ func main() {
 				Commands: []*cli.Command{
 					{
 						Name:      "instance",
-						Aliases:   []string{"in", "ins", "instances", "ec2"},
+						Aliases:   instanceAliases,
 						Usage:     "Start EC2 Instance",
 						ArgsUsage: "[instance id]",
 						Action: func(ctx context.Context, cmd *cli.Command) error {
@@ -185,8 +198,9 @@ func main() {
 				},
 			},
 			{
-				Name:  "ssm",
-				Usage: "Start SSM",
+				Name:    "ssm",
+				Usage:   "Start SSM",
+				Aliases: ssmAliases,
 				Action: func(ctx context.Context, cmd *cli.Command) error {
 					if cmd.Args().Get(0) == "" {
 						ec2Ssm.StartSessionFzf()
