@@ -32,6 +32,7 @@ func main() {
 	ssmAliases := []string{"start-session", "ssh"}
 	ecsClusterAliases := []string{"ecsc", "ecscluster", "ecsclusters"}
 	ecsServiceAliases := []string{"ecss", "ecsservice", "ecsservices", "ecssvc"}
+	ecsCronliases := []string{"ecscron", "ecsscheduledtask", "scheduledtask", "cron"}
 
 	// cli commands
 	app := &cli.Command{
@@ -76,6 +77,26 @@ func main() {
 								ecs.GetServicesCommandFzf()
 							} else {
 								ecs.GetServicesCommand(cmd.String("cluster"))
+							}
+							return nil
+						},
+					},
+					{
+						Name:    "ecs-cron",
+						Aliases: ecsCronliases,
+						Usage:   "Get ECS Scheduled Tasks",
+						Flags: []cli.Flag{
+							&cli.StringFlag{
+								Name:     "cluster",
+								Required: false,
+								Usage:    "Cluster name",
+							},
+						},
+						Action: func(ctx context.Context, cmd *cli.Command) error {
+							if cmd.String("cluster") == "" {
+								ecs.GetCronCommandFzf()
+							} else {
+								ecs.GetCronCommand(cmd.String("cluster"))
 							}
 							return nil
 						},
@@ -131,6 +152,26 @@ func main() {
 								ecs.DescribeServiceCommandFzf()
 							} else {
 								ecs.DescribeServiceCommand(cmd.Args().Get(0), cmd.String("cluster"))
+							}
+							return nil
+						},
+					},
+					{
+						Name:    "ecs-cron",
+						Aliases: ecsCronliases,
+						Usage:   "Get ECS Scheduled Tasks",
+						Flags: []cli.Flag{
+							&cli.StringFlag{
+								Name:     "cluster",
+								Required: false,
+								Usage:    "Cluster name",
+							},
+						},
+						Action: func(ctx context.Context, cmd *cli.Command) error {
+							if cmd.Args().Get(0) == "" && cmd.String("cluster") == "" {
+								ecs.DescribeCronCommandFzf()
+							} else {
+								ecs.DescribeCronCommand(cmd.Args().Get(0))
 							}
 							return nil
 						},
