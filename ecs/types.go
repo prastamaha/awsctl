@@ -72,5 +72,5 @@ type ECSServiceDescribe struct {
 	LoadBalancers        []ECSServicesLoadbalancerDescribe `json:"loadbalancers" yaml:"loadbalancers"`
 	SecurityGroups       []string                          `json:"securityGroups" yaml:"securityGroups"`
 	Subnets              []string                          `json:"subnets" yaml:"subnets"`
-	Events                []ECSServicesEventDescribe        `json:"events" yaml:"events"`
+	Events               []ECSServicesEventDescribe        `json:"events" yaml:"events"`
 }

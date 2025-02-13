@@ -13,10 +13,8 @@ import (
 )
 
 func (i *Instance) GetCommand() {
-	// Initialize Config
 	client := ec2.NewFromConfig(i.AWSConfig)
 
-	// Build the request with its input parameters
 	resp, err := client.DescribeInstances(context.TODO(), &ec2.DescribeInstancesInput{})
 	if err != nil {
 		log.Fatalf("failed to list tables, %v", err)
@@ -68,7 +66,6 @@ func (i *Instance) GetCommand() {
 		panic(err)
 	}
 
-	// Use a table sorter and tell it to sort by the Name field of our column objects.
 	table, err := klo.NewSortingPrinter("{.Name}", prn)
 	if err != nil {
 		panic(err)
@@ -77,10 +74,8 @@ func (i *Instance) GetCommand() {
 }
 
 func (i *Instance) GetRunningInstance() []EC2InstanceList {
-	// Initialize Config
 	svc := ec2.NewFromConfig(i.AWSConfig)
 
-	// Build the request with its input parameters
 	resp, err := svc.DescribeInstances(context.TODO(), &ec2.DescribeInstancesInput{
 		Filters: []ec2types.Filter{
 			{
@@ -108,7 +103,105 @@ func (i *Instance) GetRunningInstance() []EC2InstanceList {
 
 			name := ""
 			if len(instance.Tags) > 0 {
-				// search from Tags with key "Name"
+				for _, tag := range instance.Tags {
+					if *tag.Key == "Name" {
+						name = *tag.Value
+						break
+					}
+				}
+			}
+
+			outputs = append(outputs, EC2InstanceList{
+				Name:       name,
+				ID:         *instance.InstanceId,
+				State:      string(instance.State.Name),
+				Type:       string(instance.InstanceType),
+				PrivateIP:  privateIP,
+				PublicIP:   publicIP,
+				LaunchTime: instance.LaunchTime.String(),
+			})
+		}
+	}
+
+	return outputs
+}
+
+func (i *Instance) GetStoppedInstance() []EC2InstanceList {
+	svc := ec2.NewFromConfig(i.AWSConfig)
+
+	resp, err := svc.DescribeInstances(context.TODO(), &ec2.DescribeInstancesInput{
+		Filters: []ec2types.Filter{
+			{
+				Name:   aws.String("instance-state-name"),
+				Values: []string{"stopped"},
+			},
+		},
+	})
+	if err != nil {
+		log.Fatalf("failed to list tables, %v", err)
+	}
+
+	var outputs []EC2InstanceList
+	for _, reservation := range resp.Reservations {
+		for _, instance := range reservation.Instances {
+			privateIP := ""
+			if instance.PrivateIpAddress != nil {
+				privateIP = *instance.PrivateIpAddress
+			}
+
+			publicIP := ""
+			if instance.PublicIpAddress != nil {
+				publicIP = *instance.PublicIpAddress
+			}
+
+			name := ""
+			if len(instance.Tags) > 0 {
+				for _, tag := range instance.Tags {
+					if *tag.Key == "Name" {
+						name = *tag.Value
+						break
+					}
+				}
+			}
+
+			outputs = append(outputs, EC2InstanceList{
+				Name:       name,
+				ID:         *instance.InstanceId,
+				State:      string(instance.State.Name),
+				Type:       string(instance.InstanceType),
+				PrivateIP:  privateIP,
+				PublicIP:   publicIP,
+				LaunchTime: instance.LaunchTime.String(),
+			})
+		}
+	}
+
+	return outputs
+}
+
+func (i *Instance) GetAllInstance() []EC2InstanceList {
+	svc := ec2.NewFromConfig(i.AWSConfig)
+
+	resp, err := svc.DescribeInstances(context.TODO(), &ec2.DescribeInstancesInput{})
+	if err != nil {
+		log.Fatalf("failed to list tables, %v", err)
+	}
+
+	var outputs []EC2InstanceList
+	for _, reservation := range resp.Reservations {
+		for _, instance := range reservation.Instances {
+			privateIP := ""
+			if instance.PrivateIpAddress != nil {
+				privateIP = *instance.PrivateIpAddress
+			}
+
+			publicIP := ""
+			if instance.PublicIpAddress != nil {
+				publicIP = *instance.PublicIpAddress
+			}
+
+			name := ""
+			if len(instance.Tags) > 0 {
 				for _, tag := range instance.Tags {
 					if *tag.Key == "Name" {
 						name = *tag.Value
