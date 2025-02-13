@@ -74,3 +74,18 @@ type ECSServiceDescribe struct {
 	Subnets              []string                          `json:"subnets" yaml:"subnets"`
 	Events               []ECSServicesEventDescribe        `json:"events" yaml:"events"`
 }
+
+type ECSCronList struct {
+	Name     string `json:"name" yaml:"name"`
+	Schedule string `json:"schedule" yaml:"schedule"`
+	State    string `json:"state" yaml:"state"`
+}
+
+type ECSCronDescribe struct {
+	Name        string `json:"name" yaml:"name"`
+	Description string `json:"description" yaml:"description"`
+	Arn         string `json:"arn" yaml:"arn"`
+	Schedule    string `json:"schedule" yaml:"schedule"`
+	State       string `json:"state" yaml:"state"`
+	RoleArn     string `json:"roleArn" yaml:"roleArn"`
+}
