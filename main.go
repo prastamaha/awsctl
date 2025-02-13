@@ -13,7 +13,7 @@ import (
 	"github.com/urfave/cli/v3"
 )
 
-var version = "v0.0.1"
+var version = "v0.0.2"
 
 func main() {
 	cfg, err := config.LoadDefaultConfig(context.TODO(), config.WithRegion(os.Getenv("AWS_REGION")))
@@ -87,7 +87,11 @@ func main() {
 						Usage:     "Describe EC2 Instances",
 						ArgsUsage: "[instance id]",
 						Action: func(ctx context.Context, cmd *cli.Command) error {
-							ins.DescribeCommand(cmd.Args().Get(0))
+							if cmd.Args().Get(0) == "" {
+								ins.DescribeCommandFzf()
+							} else {
+								ins.DescribeCommand(cmd.Args().Get(0))
+							}
 							return nil
 						},
 					},
@@ -115,6 +119,66 @@ func main() {
 						ArgsUsage: "[service name]",
 						Action: func(ctx context.Context, cmd *cli.Command) error {
 							ecs.DescribeServiceCommand(cmd.Args().Get(0), cmd.String("cluster"))
+							return nil
+						},
+					},
+				},
+			},
+			{
+				Name:  "stop",
+				Usage: "Stop resources",
+				Commands: []*cli.Command{
+					{
+						Name:      "instance",
+						Aliases:   []string{"in", "ins", "instances", "ec2"},
+						Usage:     "Stop EC2 Instance",
+						ArgsUsage: "[instance id]",
+						Action: func(ctx context.Context, cmd *cli.Command) error {
+							if cmd.Args().Get(0) == "" {
+								ins.StopCommandFzf()
+							} else {
+								ins.StopCommand(cmd.Args().Get(0))
+							}
+							return nil
+						},
+					},
+				},
+			},
+			{
+				Name:  "restart",
+				Usage: "Restart resources",
+				Commands: []*cli.Command{
+					{
+						Name:      "instance",
+						Aliases:   []string{"in", "ins", "instances", "ec2"},
+						Usage:     "Restart EC2 Instance",
+						ArgsUsage: "[instance id]",
+						Action: func(ctx context.Context, cmd *cli.Command) error {
+							if cmd.Args().Get(0) == "" {
+								ins.RestartCommandFzf()
+							} else {
+								ins.RestartCommand(cmd.Args().Get(0))
+							}
+							return nil
+						},
+					},
+				},
+			},
+			{
+				Name:  "start",
+				Usage: "Start resources",
+				Commands: []*cli.Command{
+					{
+						Name:      "instance",
+						Aliases:   []string{"in", "ins", "instances", "ec2"},
+						Usage:     "Start EC2 Instance",
+						ArgsUsage: "[instance id]",
+						Action: func(ctx context.Context, cmd *cli.Command) error {
+							if cmd.Args().Get(0) == "" {
+								ins.StartCommandFzf()
+							} else {
+								ins.StartCommand(cmd.Args().Get(0))
+							}
 							return nil
 						},
 					},

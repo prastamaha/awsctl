@@ -12,7 +12,7 @@ import (
 func (s *SSM) StartSessionFzf() {
 	cfg := s.AWSConfig
 
-	f, err := fzf.New()
+	f, err := fzf.New(fzf.WithPrompt("Select an instance to start session: "))
 	if err != nil {
 		log.Fatal(err)
 	}
