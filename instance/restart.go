@@ -3,14 +3,16 @@ package instance
 import (
 	"context"
 	"fmt"
+	"github/prastamaha/awsctl/utils"
 	"log"
 
 	"github.com/aws/aws-sdk-go-v2/service/ec2"
-	"github.com/koki-develop/go-fzf"
+	ec2types "github.com/aws/aws-sdk-go-v2/service/ec2/types"
+	"github.com/aws/aws-sdk-go/aws"
 )
 
-func (i *Instance) RestartCommand(id string) {
-	client := ec2.NewFromConfig(i.AWSConfig)
+func (in *Instance) RestartCommand(id string) {
+	client := ec2.NewFromConfig(in.AWSConfig)
 
 	_, err := client.RebootInstances(context.TODO(), &ec2.RebootInstancesInput{
 		InstanceIds: []string{id},
@@ -22,37 +24,26 @@ func (i *Instance) RestartCommand(id string) {
 	fmt.Printf("Restarting instance %s...\n", id)
 }
 
-func (i *Instance) RestartCommandFzf() {
-	client := ec2.NewFromConfig(i.AWSConfig)
-
-	f, err := fzf.New(fzf.WithPrompt("Select an instance to restart: "))
-	if err != nil {
-		log.Fatal(err)
-	}
-	runningInstance := i.GetRunningInstance()
-	if len(runningInstance) == 0 {
-		fmt.Println("No running instances found")
+func (in *Instance) RestartCommandFzf() {
+	allInstances := in.GetInstance(
+		ec2types.Filter{
+			Name:   aws.String("instance-state-name"),
+			Values: []string{"running"},
+		},
+	)
+	if len(allInstances) == 0 {
+		fmt.Println("No instances found")
 		return
 	}
 
-	items := make([]string, len(runningInstance))
-	for i, v := range runningInstance {
+	items := make([]string, len(allInstances))
+	for i, v := range allInstances {
 		items[i] = fmt.Sprintf("%s %s", v.ID, v.Name)
 	}
 
-	idxs, err := f.Find(items, func(i int) string { return items[i] })
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	for _, i := range idxs {
-		id := runningInstance[i].ID
-		_, err := client.RebootInstances(context.TODO(), &ec2.RebootInstancesInput{
-			InstanceIds: []string{id},
-		})
-		if err != nil {
-			log.Fatalf("failed to reboot instance, %v", err)
-		}
-		fmt.Printf("Restarting instance %s...\n", id)
+	data := utils.FuzzySearch("Select an instance to restart: ", items)
+	for _, i := range data {
+		id := allInstances[i].ID
+		in.RestartCommand(id)
 	}
 }
