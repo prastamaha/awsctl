@@ -9,7 +9,24 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/ec2"
 	ec2types "github.com/aws/aws-sdk-go-v2/service/ec2/types"
 	"github.com/aws/aws-sdk-go/aws"
+	"github.com/urfave/cli/v3"
 )
+
+func (in *Instance) StopCLI() *cli.Command {
+	return &cli.Command{
+		Name:    "instance",
+		Aliases: instanceAliases,
+		Usage:   "Stop an ec2 instance",
+		Action: func(ctx context.Context, cmd *cli.Command) error {
+			if cmd.Args().Get(0) == "" {
+				in.StopCommandFzf()
+			} else {
+				in.StopCommand(cmd.Args().Get(0))
+			}
+			return nil
+		},
+	}
+}
 
 func (in *Instance) StopCommand(id string) {
 	client := ec2.NewFromConfig(in.AWSConfig)

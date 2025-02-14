@@ -7,8 +7,32 @@ import (
 	"log"
 
 	"github.com/aws/aws-sdk-go-v2/service/eventbridge"
+	"github.com/urfave/cli/v3"
 	"gopkg.in/yaml.v3"
 )
+
+func (e *ECS) DescribeCronCLI() *cli.Command {
+	return &cli.Command{
+		Name:    "ecs-cron",
+		Aliases: ecsCronliases,
+		Usage:   "Decribe an ECS cron",
+		Flags: []cli.Flag{
+			&cli.StringFlag{
+				Name:     "cluster",
+				Required: false,
+				Usage:    "Cluster name",
+			},
+		},
+		Action: func(ctx context.Context, cmd *cli.Command) error {
+			if cmd.Args().Get(0) == "" && cmd.String("cluster") == "" {
+				e.DescribeCronCommandFzf()
+			} else {
+				e.DescribeCronCommand(cmd.Args().Get(0))
+			}
+			return nil
+		},
+	}
+}
 
 func (e *ECS) DescribeCronCommand(cronName string) {
 	outputs := e.DescribeECSCron(cronName)

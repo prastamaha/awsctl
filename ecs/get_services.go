@@ -10,7 +10,31 @@ import (
 
 	"github.com/aws/aws-sdk-go-v2/service/ecs"
 	"github.com/thediveo/klo"
+	"github.com/urfave/cli/v3"
 )
+
+func (e *ECS) GetServicesCLI() *cli.Command {
+	return &cli.Command{
+		Name:    "ecs-service",
+		Aliases: ecsServiceAliases,
+		Usage:   "Get ECS services",
+		Flags: []cli.Flag{
+			&cli.StringFlag{
+				Name:     "cluster",
+				Required: false,
+				Usage:    "Cluster name",
+			},
+		},
+		Action: func(ctx context.Context, cmd *cli.Command) error {
+			if cmd.String("cluster") == "" {
+				e.GetServicesCommandFzf()
+			} else {
+				e.GetServicesCommand(cmd.String("cluster"))
+			}
+			return nil
+		},
+	}
+}
 
 func (e *ECS) GetServicesCommand(cluster string) {
 	outputs := e.GetAllServices(cluster)

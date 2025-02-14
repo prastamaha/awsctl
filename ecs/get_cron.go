@@ -10,7 +10,31 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/ecs"
 	"github.com/aws/aws-sdk-go-v2/service/eventbridge"
 	"github.com/thediveo/klo"
+	"github.com/urfave/cli/v3"
 )
+
+func (e *ECS) GetCronsCLI() *cli.Command {
+	return &cli.Command{
+		Name:    "ecs-cron",
+		Aliases: ecsCronliases,
+		Usage:   "Get ECS crons",
+		Flags: []cli.Flag{
+			&cli.StringFlag{
+				Name:     "cluster",
+				Required: false,
+				Usage:    "Cluster name",
+			},
+		},
+		Action: func(ctx context.Context, cmd *cli.Command) error {
+			if cmd.String("cluster") == "" {
+				e.GetCronCommandFzf()
+			} else {
+				e.GetCronCommand(cmd.String("cluster"))
+			}
+			return nil
+		},
+	}
+}
 
 func (e *ECS) GetCronCommand(cluster string) {
 	outputs := e.GetECSCron(cluster)

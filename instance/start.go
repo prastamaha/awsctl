@@ -9,7 +9,24 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/ec2"
 	ec2types "github.com/aws/aws-sdk-go-v2/service/ec2/types"
 	"github.com/aws/aws-sdk-go/aws"
+	"github.com/urfave/cli/v3"
 )
+
+func (in *Instance) StartCLI() *cli.Command {
+	return &cli.Command{
+		Name:    "instance",
+		Aliases: instanceAliases,
+		Usage:   "Start an ec2 instance",
+		Action: func(ctx context.Context, cmd *cli.Command) error {
+			if cmd.Args().Get(0) == "" {
+				in.StartCommandFzf()
+			} else {
+				in.StartCommand(cmd.Args().Get(0))
+			}
+			return nil
+		},
+	}
+}
 
 func (in *Instance) StartCommand(id string) {
 	client := ec2.NewFromConfig(in.AWSConfig)

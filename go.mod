@@ -13,6 +13,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/internal/endpoints/v2 v2.6.32 // indirect
 	github.com/aws/aws-sdk-go-v2/internal/ini v1.8.2 // indirect
 	github.com/aws/aws-sdk-go-v2/internal/v4a v1.3.32 // indirect
+	github.com/aws/aws-sdk-go-v2/service/applicationautoscaling v1.34.13 // indirect
 	github.com/aws/aws-sdk-go-v2/service/ec2 v1.202.4 // indirect
 	github.com/aws/aws-sdk-go-v2/service/ecs v1.53.13 // indirect
 	github.com/aws/aws-sdk-go-v2/service/eventbridge v1.36.11 // indirect
