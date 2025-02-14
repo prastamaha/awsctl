@@ -8,8 +8,25 @@ import (
 	"github/prastamaha/awsctl/utils"
 
 	"github.com/aws/aws-sdk-go-v2/service/ec2"
+	"github.com/urfave/cli/v3"
 	"gopkg.in/yaml.v3"
 )
+
+func (in *Instance) DescribeCLI() *cli.Command {
+	return &cli.Command{
+		Name:    "instance",
+		Aliases: instanceAliases,
+		Usage:   "Describe an ec2 instance",
+		Action: func(ctx context.Context, cmd *cli.Command) error {
+			if cmd.Args().Get(0) == "" {
+				in.DescribeCommandFzf()
+			} else {
+				in.DescribeCommand(cmd.Args().Get(0))
+			}
+			return nil
+		},
+	}
+}
 
 func (in *Instance) DescribeCommand(id string) {
 	client := ec2.NewFromConfig(in.AWSConfig)

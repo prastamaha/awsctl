@@ -1,6 +1,7 @@
 package ssm
 
 import (
+	"context"
 	"fmt"
 	"github/prastamaha/awsctl/instance"
 	"log"
@@ -9,7 +10,24 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/koki-develop/go-fzf"
 	"github.com/mmmorris1975/ssm-session-client/ssmclient"
+	"github.com/urfave/cli/v3"
 )
+
+func (s *SSM) StartSSMCLI() *cli.Command {
+	return &cli.Command{
+		Name:    "ssm",
+		Aliases: ssmAliases,
+		Usage:   "Start SSM Session",
+		Action: func(ctx context.Context, cmd *cli.Command) error {
+			if cmd.Args().Get(0) == "" {
+				s.StartSessionFzf()
+			} else {
+				s.StartSessionTarget(cmd.Args().Get(0))
+			}
+			return nil
+		},
+	}
+}
 
 func (s *SSM) StartSessionFzf() {
 	cfg := s.AWSConfig

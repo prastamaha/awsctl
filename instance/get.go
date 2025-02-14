@@ -9,7 +9,20 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/ec2"
 	ec2types "github.com/aws/aws-sdk-go-v2/service/ec2/types"
 	"github.com/thediveo/klo"
+	"github.com/urfave/cli/v3"
 )
+
+func (in *Instance) GetCLI() *cli.Command {
+	return &cli.Command{
+		Name:    "instance",
+		Aliases: instanceAliases,
+		Usage:   "Get ec2 instances",
+		Action: func(ctx context.Context, cmd *cli.Command) error {
+			in.GetCommand()
+			return nil
+		},
+	}
+}
 
 func (i *Instance) GetCommand() {
 	outputs := i.GetInstance()

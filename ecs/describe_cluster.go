@@ -7,8 +7,25 @@ import (
 	"log"
 
 	"github.com/aws/aws-sdk-go-v2/service/ecs"
+	"github.com/urfave/cli/v3"
 	"gopkg.in/yaml.v3"
 )
+
+func (e *ECS) DescribeClusterCLI() *cli.Command {
+	return &cli.Command{
+		Name:    "ecs-cluster",
+		Aliases: ecsClusterAliases,
+		Usage:   "Decribe an ECS cluster",
+		Action: func(ctx context.Context, cmd *cli.Command) error {
+			if cmd.Args().Get(0) == "" {
+				e.DescribeClusterCommandFzf()
+			} else {
+				e.DescribeClusterCommand(cmd.Args().Get(0))
+			}
+			return nil
+		},
+	}
+}
 
 func (e *ECS) DescribeClusterCommand(name string) {
 	client := ecs.NewFromConfig(e.AWSConfig)
@@ -50,7 +67,7 @@ func (e *ECS) DescribeClusterCommandFzf() {
 		fmt.Println("No ecs clusters found")
 		return
 	}
-	
+
 	items := make([]string, len(ecsClusters))
 	for i, v := range ecsClusters {
 		items[i] = v.Name

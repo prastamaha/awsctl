@@ -8,7 +8,20 @@ import (
 
 	"github.com/aws/aws-sdk-go-v2/service/ecs"
 	"github.com/thediveo/klo"
+	"github.com/urfave/cli/v3"
 )
+
+func (e *ECS) GetClustersCLI() *cli.Command {
+	return &cli.Command{
+		Name:    "ecs-cluster",
+		Aliases: ecsClusterAliases,
+		Usage:   "Get ECS clusters",
+		Action: func(ctx context.Context, cmd *cli.Command) error {
+			e.GetClusterCommand()
+			return nil
+		},
+	}
+}
 
 func (e *ECS) GetClusterCommand() {
 	outputs := e.GetAllECSCluster()

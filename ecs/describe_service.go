@@ -8,6 +8,7 @@ import (
 
 	"github.com/aws/aws-sdk-go-v2/service/ecs"
 	"github.com/aws/aws-sdk-go-v2/service/ecs/types"
+	"github.com/urfave/cli/v3"
 	"gopkg.in/yaml.v3"
 )
 
@@ -56,6 +57,30 @@ func convertEvents(events []types.ServiceEvent) []ECSServicesEventDescribe {
 		})
 	}
 	return result
+}
+
+func (e *ECS) DescribeServiceCLI() *cli.Command {
+	return &cli.Command{
+		Name:    "ecs-service",
+		Aliases: ecsServiceAliases,
+		Usage:   "Decribe an ECS service",
+		Flags: []cli.Flag{
+			&cli.StringFlag{
+				Name:     "cluster",
+				Required: false,
+				Usage:    "Cluster name",
+			},
+		},
+		ArgsUsage: "[service name]",
+		Action: func(ctx context.Context, cmd *cli.Command) error {
+			if cmd.Args().Get(0) == "" && cmd.String("cluster") == "" {
+				e.DescribeServiceCommandFzf()
+			} else {
+				e.DescribeServiceCommand(cmd.Args().Get(0), cmd.String("cluster"))
+			}
+			return nil
+		},
+	}
 }
 
 func (e *ECS) DescribeServiceCommand(service string, cluster string) {

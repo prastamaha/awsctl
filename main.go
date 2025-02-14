@@ -23,16 +23,9 @@ func main() {
 	}
 
 	// initialize services
-	ins := instance.Instance{AWSConfig: cfg}
+	ec2Ins := instance.Instance{AWSConfig: cfg}
 	ec2Ssm := ssm.SSM{AWSConfig: cfg}
 	ecs := ecs.ECS{AWSConfig: cfg}
-
-	// aliases
-	instanceAliases := []string{"in", "ins", "instances", "ec2"}
-	ssmAliases := []string{"start-session", "ssh"}
-	ecsClusterAliases := []string{"ecsc", "ecscluster", "ecsclusters"}
-	ecsServiceAliases := []string{"ecss", "ecsservice", "ecsservices", "ecssvc"}
-	ecsCronliases := []string{"ecscron", "ecsscheduledtask", "scheduledtask", "cron"}
 
 	// cli commands
 	app := &cli.Command{
@@ -43,214 +36,48 @@ func main() {
 				Name:  "get",
 				Usage: "Get resources",
 				Commands: []*cli.Command{
-					{
-						Name:    "instance",
-						Aliases: instanceAliases,
-						Usage:   "Get EC2 Instances",
-						Action: func(ctx context.Context, cmd *cli.Command) error {
-							ins.GetCommand()
-							return nil
-						},
-					},
-					{
-						Name:    "ecs-cluster",
-						Aliases: ecsClusterAliases,
-						Usage:   "Get ECS Clusters",
-						Action: func(ctx context.Context, cmd *cli.Command) error {
-							ecs.GetClusterCommand()
-							return nil
-						},
-					},
-					{
-						Name:    "ecs-service",
-						Aliases: ecsServiceAliases,
-						Usage:   "Get ECS Services",
-						Flags: []cli.Flag{
-							&cli.StringFlag{
-								Name:     "cluster",
-								Required: false,
-								Usage:    "Cluster name",
-							},
-						},
-						Action: func(ctx context.Context, cmd *cli.Command) error {
-							if cmd.String("cluster") == "" {
-								ecs.GetServicesCommandFzf()
-							} else {
-								ecs.GetServicesCommand(cmd.String("cluster"))
-							}
-							return nil
-						},
-					},
-					{
-						Name:    "ecs-cron",
-						Aliases: ecsCronliases,
-						Usage:   "Get ECS Scheduled Tasks",
-						Flags: []cli.Flag{
-							&cli.StringFlag{
-								Name:     "cluster",
-								Required: false,
-								Usage:    "Cluster name",
-							},
-						},
-						Action: func(ctx context.Context, cmd *cli.Command) error {
-							if cmd.String("cluster") == "" {
-								ecs.GetCronCommandFzf()
-							} else {
-								ecs.GetCronCommand(cmd.String("cluster"))
-							}
-							return nil
-						},
-					},
+					ec2Ins.GetCLI(),
+					ecs.GetClustersCLI(),
+					ecs.GetCronsCLI(),
+					ecs.GetServicesCLI(),
 				},
 			},
 			{
 				Name:  "describe",
 				Usage: "Describe resources",
 				Commands: []*cli.Command{
-					{
-						Name:      "instance",
-						Aliases:   instanceAliases,
-						Usage:     "Describe EC2 Instances",
-						ArgsUsage: "[instance id]",
-						Action: func(ctx context.Context, cmd *cli.Command) error {
-							if cmd.Args().Get(0) == "" {
-								ins.DescribeCommandFzf()
-							} else {
-								ins.DescribeCommand(cmd.Args().Get(0))
-							}
-							return nil
-						},
-					},
-					{
-						Name:      "ecs-cluster",
-						Aliases:   ecsClusterAliases,
-						Usage:     "Describe ECS Clusters",
-						ArgsUsage: "[cluster name]",
-						Action: func(ctx context.Context, cmd *cli.Command) error {
-							if cmd.Args().Get(0) == "" {
-								ecs.DescribeClusterCommandFzf()
-							} else {
-								ecs.DescribeClusterCommand(cmd.Args().Get(0))
-							}
-							return nil
-						},
-					},
-					{
-						Name:    "ecs-service",
-						Aliases: ecsServiceAliases,
-						Usage:   "Describe ECS Services",
-						Flags: []cli.Flag{
-							&cli.StringFlag{
-								Name:     "cluster",
-								Required: false,
-								Usage:    "Cluster name",
-							},
-						},
-						ArgsUsage: "[service name]",
-						Action: func(ctx context.Context, cmd *cli.Command) error {
-							if cmd.Args().Get(0) == "" && cmd.String("cluster") == "" {
-								ecs.DescribeServiceCommandFzf()
-							} else {
-								ecs.DescribeServiceCommand(cmd.Args().Get(0), cmd.String("cluster"))
-							}
-							return nil
-						},
-					},
-					{
-						Name:    "ecs-cron",
-						Aliases: ecsCronliases,
-						Usage:   "Get ECS Scheduled Tasks",
-						Flags: []cli.Flag{
-							&cli.StringFlag{
-								Name:     "cluster",
-								Required: false,
-								Usage:    "Cluster name",
-							},
-						},
-						Action: func(ctx context.Context, cmd *cli.Command) error {
-							if cmd.Args().Get(0) == "" && cmd.String("cluster") == "" {
-								ecs.DescribeCronCommandFzf()
-							} else {
-								ecs.DescribeCronCommand(cmd.Args().Get(0))
-							}
-							return nil
-						},
-					},
+					ec2Ins.DescribeCLI(),
+					ecs.DescribeServiceCLI(),
+					ecs.DescribeClusterCLI(),
+					ecs.DescribeCronCLI(),
 				},
 			},
 			{
 				Name:  "stop",
 				Usage: "Stop resources",
 				Commands: []*cli.Command{
-					{
-						Name:      "instance",
-						Aliases:   instanceAliases,
-						Usage:     "Stop EC2 Instance",
-						ArgsUsage: "[instance id]",
-						Action: func(ctx context.Context, cmd *cli.Command) error {
-							if cmd.Args().Get(0) == "" {
-								ins.StopCommandFzf()
-							} else {
-								ins.StopCommand(cmd.Args().Get(0))
-							}
-							return nil
-						},
-					},
+					ec2Ins.StopCLI(),
+					ecs.StopServiceCLI(),
 				},
 			},
 			{
 				Name:  "restart",
 				Usage: "Restart resources",
 				Commands: []*cli.Command{
-					{
-						Name:      "instance",
-						Aliases:   instanceAliases,
-						Usage:     "Restart EC2 Instance",
-						ArgsUsage: "[instance id]",
-						Action: func(ctx context.Context, cmd *cli.Command) error {
-							if cmd.Args().Get(0) == "" {
-								ins.RestartCommandFzf()
-							} else {
-								ins.RestartCommand(cmd.Args().Get(0))
-							}
-							return nil
-						},
-					},
+					ec2Ins.RestartCLI(),
+					ecs.RestartServiceCLI(),
 				},
 			},
 			{
 				Name:  "start",
 				Usage: "Start resources",
 				Commands: []*cli.Command{
-					{
-						Name:      "instance",
-						Aliases:   instanceAliases,
-						Usage:     "Start EC2 Instance",
-						ArgsUsage: "[instance id]",
-						Action: func(ctx context.Context, cmd *cli.Command) error {
-							if cmd.Args().Get(0) == "" {
-								ins.StartCommandFzf()
-							} else {
-								ins.StartCommand(cmd.Args().Get(0))
-							}
-							return nil
-						},
-					},
+					ec2Ins.StartCLI(),
+					ecs.StartServiceCLI(),
+					ec2Ssm.StartSSMCLI(),
 				},
 			},
-			{
-				Name:    "ssm",
-				Usage:   "Start SSM",
-				Aliases: ssmAliases,
-				Action: func(ctx context.Context, cmd *cli.Command) error {
-					if cmd.Args().Get(0) == "" {
-						ec2Ssm.StartSessionFzf()
-					} else {
-						ec2Ssm.StartSessionTarget(cmd.Args().Get(0))
-					}
-					return nil
-				},
-			},
+			ec2Ssm.StartSSMCLI(),
 			{
 				Name:  "version",
 				Usage: "Current Version",

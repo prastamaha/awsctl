@@ -4,6 +4,8 @@ import (
 	"github.com/aws/aws-sdk-go-v2/aws"
 )
 
+var instanceAliases = []string{"in", "ins", "instances", "ec2"}
+
 type Instance struct {
 	AWSConfig aws.Config
 }

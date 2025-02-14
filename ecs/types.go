@@ -2,6 +2,10 @@ package ecs
 
 import "github.com/aws/aws-sdk-go-v2/aws"
 
+var ecsClusterAliases = []string{"ecsc", "ecscluster", "ecsclusters"}
+var ecsServiceAliases = []string{"ecss", "ecsservice", "ecsservices", "ecssvc"}
+var ecsCronliases = []string{"ecscron", "ecsscheduledtask", "scheduledtask", "cron"}
+
 type ECS struct {
 	AWSConfig aws.Config
 }
