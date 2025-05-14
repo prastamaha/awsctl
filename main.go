@@ -13,7 +13,7 @@ import (
 	"github.com/urfave/cli/v3"
 )
 
-var version = "v0.0.2"
+var version = "v0.0.3"
 
 func main() {
 	// load aws config
