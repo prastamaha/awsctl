@@ -9,7 +9,7 @@ import (
 	ec2types "github.com/aws/aws-sdk-go-v2/service/ec2/types"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/koki-develop/go-fzf"
-	"github.com/mmmorris1975/ssm-session-client/ssmclient"
+	"github/prastamaha/awsctl/ssm/ssmclient"
 	"github.com/urfave/cli/v3"
 )
 
