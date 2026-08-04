@@ -5,7 +5,13 @@ import (
 	"fmt"
 	"github/prastamaha/awsctl/ecs"
 	"github/prastamaha/awsctl/instance"
+	"github/prastamaha/awsctl/loadbalancer"
+	"github/prastamaha/awsctl/s3"
+	"github/prastamaha/awsctl/securitygroup"
 	"github/prastamaha/awsctl/ssm"
+	"github/prastamaha/awsctl/ssm/parameter"
+	"github/prastamaha/awsctl/subnet"
+	"github/prastamaha/awsctl/vpc"
 	"log"
 	"os"
 
@@ -13,7 +19,7 @@ import (
 	"github.com/urfave/cli/v3"
 )
 
-var version = "v0.0.3"
+var version = "v0.1.0"
 
 func main() {
 	// load aws config
@@ -26,6 +32,12 @@ func main() {
 	ec2Ins := instance.Instance{AWSConfig: cfg}
 	ec2Ssm := ssm.SSM{AWSConfig: cfg}
 	ecs := ecs.ECS{AWSConfig: cfg}
+	ssmParam := parameter.Parameter{AWSConfig: cfg}
+	s3Bucket := s3.S3{AWSConfig: cfg}
+	lb := loadbalancer.LoadBalancer{AWSConfig: cfg}
+	sg := securitygroup.SecurityGroup{AWSConfig: cfg}
+	vpcSvc := vpc.VPC{AWSConfig: cfg}
+	subnetSvc := subnet.Subnet{AWSConfig: cfg}
 
 	// cli commands
 	app := &cli.Command{
@@ -40,6 +52,12 @@ func main() {
 					ecs.GetClustersCLI(),
 					ecs.GetCronsCLI(),
 					ecs.GetServicesCLI(),
+					ssmParam.GetCLI(),
+					s3Bucket.GetCLI(),
+					lb.GetCLI(),
+					sg.GetCLI(),
+					vpcSvc.GetCLI(),
+					subnetSvc.GetCLI(),
 				},
 			},
 			{
@@ -50,6 +68,12 @@ func main() {
 					ecs.DescribeServiceCLI(),
 					ecs.DescribeClusterCLI(),
 					ecs.DescribeCronCLI(),
+					ssmParam.DescribeCLI(),
+					s3Bucket.DescribeCLI(),
+					lb.DescribeCLI(),
+					sg.DescribeCLI(),
+					vpcSvc.DescribeCLI(),
+					subnetSvc.DescribeCLI(),
 				},
 			},
 			{
