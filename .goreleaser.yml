@@ -23,7 +23,7 @@ brews:
       owner: prastamaha
       name: homebrew-tap
     commit_author:
-      name: prasamaha
+      name: prastamaha
       email: prastamaha@gmail.com
 
 checksum:
